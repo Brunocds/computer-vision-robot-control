@@ -96,3 +96,35 @@ When running the application you can specify two options:
  ```bash
  $ python apply-model.py --arduino_mode 1
  ```
+ 
+ ## Project Structure
+ <pre>
+├── README.md
+├── apply-model.py
+├── collect-train-data.py
+├── data
+│   ├── gesture-label.csv
+│   └── training-data.csv
+├── helpers.py
+├── model
+│   └── clf.pkl
+├── model-training.ipynb
+├── reports
+│   └── monography.pdf
+└── requirements.txt
+</pre>
+
+#### apply-model.py
+It's the main program of the application, which can be run using an Arduino or not. 
+
+#### collect-train-data.py
+It's the python script used to collect training data for the MLP model training. It is responsible to pre process the coordinates and save then into the **data/training-data.csv** file. 
+
+#### model-training.ipynb
+It's a notebook that trains a MLP model using the training-data.csv obtained by the collect-train-data.py. The output of this notebook is the **model/clf.pkl** file, which is imported by the apply-model to identify the hand gesture.  
+
+#### gesture-label.csv
+It's a csv file mapping the gestures that the model will identify to numbers, as the MLP model uses numbers as output. The labeling filled in this file will be shown in the image processing. 
+
+#### helpers.py
+It's a helper file containing functions used by both apply-model.py and collect-train-data.py.
