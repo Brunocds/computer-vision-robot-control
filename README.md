@@ -54,4 +54,45 @@ maximum expansion or maximum contraction occurs, as shown below:
 
 ![diversos-graus](https://user-images.githubusercontent.com/21988243/216860314-194199ea-ea06-4f00-9d69-bf5e62d8cf5e.png)
 
-**P.S.**: the project was developed in group, the other members of the group were responsible for developing the robotics arm with 3D printing and building its electronic with Arduino as microcontroller while **I was responsible for developing the entire code of this repository, doing the computer vision script and its interaction with the Arduino**. For information about the construction of the robotic arm and its design please refer to the [monography.pdf](https://github.com/Brunocds/computer-vision-robot-control/blob/main/reports/monography.pdf) file in the reports folder.
+**P.S.**: the project was done in group, the other members of the group were responsible for developing the robotics arm with 3D printing and building its electronic with Arduino as microcontroller while **I was responsible for developing the entire code of this repository, doing the computer vision script and its interaction with the Arduino**. For information about the construction of the robotic arm and its design please refer to the [monography.pdf](https://github.com/Brunocds/computer-vision-robot-control/blob/main/reports/monography.pdf) file in the reports folder.
+
+## Architecture
+
+The computer vision of the project has the following architecture:
+
+![general-architecture](https://user-images.githubusercontent.com/21988243/216868930-633dfbce-9c69-4331-ab5c-cbc0ba73785a.png)
+
+* **Image capture and processing:** using OpenCV through Python is possible to capture an image from the webcam as a vector or matrix of pixels, each pixel containing information about the values of the red, green and blue colors (from 0 to 255 for each of them) using the RGB system. 
+* **Hand recognition:** the matrix of pixels in the previous step is used as input to MediaPipe, a ready-to-use cutting-edge ML solution framework that has in one of its solutions the hand recognition. The output of the MediaPipe is the coordinates x,y and z of 21 joints of the hands identified in the image.
+* **Gesture recognition:** a MLP (Multilayer Perceptron) artificial neural network model is trained using the joints coordinates captured by MediaPipe and uses it as input to detect what hand gesture was done.
+* **Distance ratio between finger tips:** the coordinates captured by MediaPipe are used to calculate the distance ratio between the thumb and index tips through Python using Numpy and simple geometry. 
+
+## Getting started (on Windows)
+
+1. Clone the source code by running:
+```bash
+$ git clone https://github.com/Brunocds/computer-vision-robot-control.git
+```
+2. Navigate to the project root folder by running:
+```bash
+$ cd computer-vision-robot-control
+```
+3. Setup a virtual environment:
+```bash
+$ python -m venv venv 
+$ source venv/Scripts/activate
+$ pip install -r requirements.txt
+```
+4. Run the application:
+```bash
+$ python apply-model.py 
+```
+When running the application you can specify two options:
+* --device: the camera device number used by OpenCV. Usually is 0, but if the code don't run you can try other, e.g.:
+ ```bash
+ $ python apply-model.py --device 0
+ ```
+* --arduino_mode: if you'd like to run only the computer vision side of the application use any parameter different than 1 (default is already different than 1). If you'd like to run the application using Arduino, change the ports used by the servo motors in the "articulation_dict" dictionary inside the apply-model.py and the specify the arduino_mode 1, e.g.:
+ ```bash
+ $ python apply-model.py --arduino_mode 1
+ ```
