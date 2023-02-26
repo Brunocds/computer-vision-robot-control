@@ -2,9 +2,9 @@
 
 ## Project Overview 
 
-This project was developed as an undergradutate dissertation for the Instrumentation, Automation and Robotics Engineering course at the Federal University of ABC (UFABC).
+This project was developed as an undergraduate dissertation for the Instrumentation, Automation and Robotics Engineering course at the Federal University of ABC (UFABC).
 
-The goal of this project is to control entirely by computer vision a robotic arm developed using 3D printing and electronics with Arduino as microcontroller, controlling the joints of the robotic arm by capturing dynamic images of both hands of an operator. 
+The goal of this project is to control entirely by computer vision a robotic arm developed using 3D printing and electronics with Arduino as a microcontroller, controlling the joints of the robotic arm by capturing dynamic images of both hands of an operator. 
 
 ![tg](https://user-images.githubusercontent.com/21988243/216863371-609cd738-44ab-485f-bbc1-a5000a6fc4ab.gif)
 
