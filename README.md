@@ -159,6 +159,104 @@ $$
 
 Below there is an example of applying this normalization to the relative coordinates of a hand gesture:
 
-<div align="center"><img src="https://user-images.githubusercontent.com/21988243/221393267-5324cd49-06aa-4dbe-b762-9c7c16a58d62.png" width="70%" height="auto"></div>
+<div align="center"><img src="https://user-images.githubusercontent.com/21988243/221393405-5b3f995f-ee9f-4b2f-b6fc-5535aba0da7f.png" width="70%" height="auto"></div>
 
 #### 2. How to Collect
+
+As the model uses numeric values to be trained, the first step is to update the **gesture-label.csv** file with the mapping between the gesture and a number. For the model trained it was used this mapping:
+
+<div align="center">
+<table>
+  <thead>
+    <tr>
+      <th style="text-align:center">Label</th>
+      <th style="text-align:center">Gesture</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align:center">0</td>
+      <td style="text-align:center">Wrist</td>
+    </tr>
+    <tr>
+      <td style="text-align:center">1</td>
+      <td style="text-align:center">Thumb</td>
+    </tr>
+    <tr>
+      <td style="text-align:center">2</td>
+      <td style="text-align:center">Index</td>
+    </tr>
+    <tr>
+      <td style="text-align:center">3</td>
+      <td style="text-align:center">Middle</td>
+    </tr>
+    <tr>
+      <td style="text-align:center">4</td>
+      <td style="text-align:center">Ring</td>
+    </tr>
+    <tr>
+      <td style="text-align:center">5</td>
+      <td style="text-align:center">Pinky</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+Then in the root folder of the project, run the following command:
+
+```bash
+$ python collect-train-data.py 
+```
+
+If it don't open a new window, maybe it's because your webcam is under other device number. Just as the main application, you can specify the device number, like for example ```python collect-train-data.py --device 1```.
+
+To collect the data, you have the following options:
+
+- Close the window: press the key **'Q'**
+- Erase all training data: press the key **'E'**
+- Save coordinate: press key from **0** to **9**
+
+The gesture coordinates will be associated to the number used to save it and this number must match what was filled in the **gesture-label.csv**. Below is shown an example of a gesture made and the coordinates saved from that gesture:
+
+<div align="center"><img src="https://user-images.githubusercontent.com/21988243/221394193-9fdab623-8152-440d-ad62-a09caea9fa6d.png" width="50%" height="auto"></div>
+
+#### 3. Training
+
+The training of the model is done using the [model-training.ipynb](https://github.com/Brunocds/computer-vision-robot-control/blob/main/model-training.ipynb) notebook. After collecting the data you can just run all the cells of the notebook to generate the new model pickle file. 
+
+To train the model it was used the Python library scikit-learn, which has several tools for machine learning. Within it, the MLPClassifier model was used, which implements the multi-layer perceptron neural network model. When using this model, the following parameters were defined:
+
+- **Hidden layer sizes:** 20, 15, 13, 10 and 8 
+- **Activation function:** relu
+- **Solver:** Stochastic Gradient Descent
+
+<p style="margin-top: 100px; margin-bottom: 100px;">
+<div align="center">
+<img src="https://user-images.githubusercontent.com/21988243/221394795-5ad4fddb-528e-4d71-9fc3-8c902d11a4ab.png" width="100%" height="auto">
+</div>
+</p>
+
+The training dataset consists of 651 coordinate records:
+
+- **Wrist gesture:** 106 records
+- **Thumb gesture:** 65 records 
+- **Index gesture:** 96 records 
+- **Middle gesture:** 109 records 
+- **Ring gesture:** 155 records 
+- **Pinky gesture:** 120 records
+
+The data capture includes performing the gestures at different depths, inclinations, and small rotations, so that it is easier for the operator to have the desired gesture identified. For training the model, 80% of the data from the training dataset was used for training (521 records) and 20% for testing (130 records). After the training the model had the following confusion matrix, performing really well: 
+
+<div align="center"><img src="https://user-images.githubusercontent.com/21988243/221394505-49cc5955-4361-45d2-91e1-dbc38920f4ce.png" width="40%" height="auto"></div>
+
+## The Control of Joint Expansion and Contraction
+
+The calculation of the distance between the thumb and the index finger is used to generate a percentage from 0% to 100% indicating how much the joint will expand or contract. The distance is calculated using the Pythagorean theorem, as shown in the image below:
+
+<div align="center"><img src="https://user-images.githubusercontent.com/21988243/221395118-2c09ed3a-0d11-4406-acba-b9a7e1adf223.png" width="40%" height="auto"></div>
+
+We have that this distance is given as a scalar number in pixels. To make it a percentage from 0% to 100%, with 0% when the fingers are touching and 100% something close to the maximum distance that the user can make between them, the distance between the wrist and the tip of the index finger was also calculated and then taken the quotient of both distances:
+
+<div align="center"><img src="https://user-images.githubusercontent.com/21988243/221395302-fc19f24c-a59b-404d-bedc-c9ab0c9c2960.png" width="40%" height="auto"></div>
+
+For cases where the distance between the tip of the thumb and index finger exceeds the distance between the wrist and the tip of the index finger, a value of 100% is forced as output. The idea of using this ratio as output is motivated by leaving a generic percentage for any hand that is used, since they are relative distances to the operator's hand, and also because there is no maximum distance between the tip of the thumb and index finger, varying from person to person how much they can be separated.
