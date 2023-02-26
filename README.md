@@ -97,6 +97,8 @@ When running the application you can specify two options:
  $ python apply-model.py --arduino_mode 1
  ```
  
+ 5. When you're done, to quit the opened window just select it and press "Q".
+ 
  ## Project Structure
  <pre>
 ├── README.md
@@ -128,3 +130,35 @@ It's a csv file mapping the gestures that the model will identify to numbers, as
 
 #### helpers.py
 It's a helper file containing functions used by both apply-model.py and collect-train-data.py.
+
+ ## Model Training
+
+Although the project already contains a trained model for the gestures listed in the project overview, it's possible to use the **collect-train-data.py**, **model-training.ipynb** and **gesture-label.csv** to collect data of other gestures and create and train a new model using it. 
+ 
+### Data Collection 
+
+#### 1. Strategy
+
+As discussed in the archictecure topic the input of the gesture recognition model is the output of the MediaPipe Hands solution, which is the coordinates in width, height and depth of the hand's joints. However for the recognition of gestures the depth is irrelevant because a gesture will be the same regardless of the evaluated depth, so the input data of the model will be the x and y coordinates of each of the 21 joints, totaling 42 entries to result in the classification of one of the six possible gestures, as shown in the example below:
+
+![processing](https://user-images.githubusercontent.com/21988243/221391221-c6e90848-781c-4d33-9f4f-a8926ca4af81.png)
+
+It's not possible to use the raw coordinates gotten from the MediaPipe as input for the model because the coordinates are global based on the position of the hand in the camera view and this way a same gesture will have completely different coordinates if we move the hand position, as shown in the example below for a joint coordinate in a same gesture:
+
+<div align="center"><img src="https://user-images.githubusercontent.com/21988243/221391648-a74d1d7a-8d9f-417d-badf-d1dbc76b0a12.png" width="40%" height="auto"></div>
+
+The input desired to train the model are coordinates that varies only when a gesture change occurs and one way to achieve this is to use relative coordinates. The strategy used to get the relative coordinates is to subtract all coordinates by the coordinates of the wrist, making the wrist coordinate the origin (0,0), and all other coordinates relative to it, as shown in the example below:
+
+<div align="center"><img src="https://user-images.githubusercontent.com/21988243/221392433-d55259f9-be30-4b76-a6c6-14cfa489dd80.png" width="80%" height="auto"></div>
+
+After obtaining the relative coordinates, a good practice to improve the model's performance is to normalize the input data. The objective of normalization is to change the values of the numeric columns to a common scale without causing distortion in the value ranges. This is useful for the perceptron neural network model in question, as it uses linear combinations of inputs and associates weights to them. Since the coordinates can have several distinct value ranges, such as the Y-coordinate of the middle finger having values in the range of 0 to 100 and the thumb having values in the range of 300 to 400, the thumb coordinate can significantly influence the result due to its larger values, not necessarily because it is more important as a predictor. That being said, the method used to normalize the coordinates is the min-max normalization, in which all variables are placed in values between 0 and 1 using the following formula:
+
+$$
+coordinate_{scaled}  = \dfrac{coordinate - coordinate_{min}}{coordinate_{max} - coordinate_{min}}
+$$
+
+Below there is an example of applying this normalization to the relative coordinates of a hand gesture:
+
+<div align="center"><img src="https://user-images.githubusercontent.com/21988243/221393267-5324cd49-06aa-4dbe-b762-9c7c16a58d62.png" width="70%" height="auto"></div>
+
+#### 2. How to Collect
